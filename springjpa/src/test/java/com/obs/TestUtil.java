@@ -13,6 +13,7 @@ public class TestUtil {
 
     /**
      * Return a user with default values with no roles
+     *
      * @return User object
      */
     public static User createUser() {
@@ -26,6 +27,7 @@ public class TestUtil {
 
     /**
      * Return a user with default values with no roles
+     *
      * @return Role object
      */
     public static Role createRole() {
@@ -33,5 +35,18 @@ public class TestUtil {
         String description = name + " role";
         Long userId = 1l;
         return (Role) new Role().setName(name).setDescription(description).setCreatedBy(userId).setUpdatedBy(userId);
+    }
+
+    /**
+     * Sleep for the x milliseconds
+     *
+     * @param millisec
+     */
+    public static void sleep(long millisec) {
+        try {
+            Thread.sleep(millisec);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

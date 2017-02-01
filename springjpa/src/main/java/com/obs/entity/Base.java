@@ -6,11 +6,14 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 public abstract class Base {
+    // Auto set the value to current timestamp in DB column definition
+    // Value will be inserted upon transaction commit
     @Column(columnDefinition = "TIMESTAMP", updatable = false)
     protected LocalDateTime createdDateTime;
     @Column(updatable = false)
     protected Long createdBy;
     // Auto update the value to current timestamp in DB column definition
+    // Value will be inserted upon transaction commit
     @Column(columnDefinition = "TIMESTAMP", updatable = false)
     protected LocalDateTime updatedDateTime;
     protected Long updatedBy;

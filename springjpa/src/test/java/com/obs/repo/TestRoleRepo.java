@@ -46,11 +46,8 @@ public class TestRoleRepo {
         roleRepo.save(role);
 
         // To ensure that the updated time will be different
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        TestUtil.sleep(1000);
+
         Role updatedRole = roleRepo.findOne(role.getId());
         updatedRole.setName(UUID.randomUUID().toString());
         updatedRole.setDescription(UUID.randomUUID().toString());
