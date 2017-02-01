@@ -1,5 +1,6 @@
 package com.obs;
 
+import com.obs.entity.Post;
 import com.obs.entity.Role;
 import com.obs.entity.User;
 
@@ -48,5 +49,18 @@ public class TestUtil {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Return a post with default values with no comments
+     *
+     * @return Post object
+     */
+    public static Post createPost() {
+        String title = UUID.randomUUID().toString();
+        String content = UUID.randomUUID().toString();
+        Long userId = 1l;
+        return (Post) new Post().setTitle(title).setContent(content).setComments(new HashSet<>()).setOrphanComments(new HashSet<>())
+                .setCreatedBy(userId).setUpdatedBy(userId);
     }
 }
