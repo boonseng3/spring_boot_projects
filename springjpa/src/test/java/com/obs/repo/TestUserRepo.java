@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
@@ -86,5 +89,54 @@ public class TestUserRepo {
         assertThat(dbUser).isEqualToIgnoringGivenFields(updateUser, "updatedDateTime");
         assertThat(dbUser.getCreatedDateTime()).isLessThan(dbUser.getUpdatedDateTime());
         logger.debug("Created object {}", dbUser);
+    }
+
+
+    @Test
+    public void pageableUsers() {
+        for (int i = 1; i <= 10; i++) {
+            User user = TestUtil.createUser();
+            user.getRoles().add(roleRepo.findByName("ROLE_ADMIN").get());
+            userRepo.save(user);
+        }
+        int pageSize = 5;
+
+        // verify the id is in sequence
+        userRepo.findAll(new PageRequest(0, pageSize)).getContent().stream()
+                .map(user -> user.getId())
+                .reduce((prevIndex, currentIndex) -> {
+                    assertThat(prevIndex).isEqualTo(currentIndex - 1l);
+                    return currentIndex;
+                });
+        // page 1
+        User user = userRepo.findAll(new PageRequest(1, pageSize)).getContent().stream().findFirst().get();
+        assertThat(user).hasFieldOrPropertyWithValue("id", 6l);
+
+        // next page is 2
+        Page<User> page2 = userRepo.findAll(new PageRequest(1, pageSize));
+        assertThat(page2.nextPageable().getPageNumber()).isEqualTo(2);
+
+        // get page 2
+        PageRequest pageRequest = new PageRequest(page2.nextPageable().getPageNumber(), pageSize);
+        user = userRepo.findAll(pageRequest).getContent().stream().findFirst().get();
+        assertThat(user).hasFieldOrPropertyWithValue("id", Integer.valueOf(page2.nextPageable().getPageNumber() * pageSize + 1).longValue());
+    }
+
+    @Test
+    public void pageableSortUsers() {
+        for (int i = 1; i <= 10; i++) {
+            User user = TestUtil.createUser();
+            user.getRoles().add(roleRepo.findByName("ROLE_ADMIN").get());
+            userRepo.save(user);
+        }
+        int pageSize = 5;
+
+        // verify the id is in sequence
+        userRepo.findAll(new PageRequest(0, pageSize, Sort.Direction.ASC, "username")).getContent().stream()
+                .reduce((prevIndex, currentIndex) -> {
+                    assertThat(prevIndex.getUsername().compareTo(currentIndex.getUsername()) < 0).isTrue();
+                    logger.debug("user [id: {}, username: {}]", prevIndex.getId(), prevIndex.getUsername());
+                    return currentIndex;
+                });
     }
 }
