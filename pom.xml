@@ -17,6 +17,7 @@
     <modules>
         <module>springjpa</module>
         <module>springsecurityrest</module>
+        <module>springsecuritypage</module>
     </modules>
 
 

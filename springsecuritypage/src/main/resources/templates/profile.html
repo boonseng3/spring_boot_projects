@@ -1,0 +1,13 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org">
+<head>
+    <title tiles:fragment="title">Home</title>
+</head>
+<body>
+<div>
+    <h4>
+        Welcome <b th:inline="text">[[${currentUser.username}]] </b>
+    </h4>
+</div>
+</body>
+</html>
