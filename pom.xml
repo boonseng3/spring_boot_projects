@@ -18,6 +18,7 @@
         <module>springjpa</module>
         <module>springsecurityrest</module>
         <module>springsecuritypage</module>
+        <module>springmultipledatasource</module>
     </modules>
 
 

@@ -1,0 +1,35 @@
+spring:
+  jpa:
+#    show-sql: true
+    properties:
+      # hibernate custom properties
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+        hbm2ddl.auto: create
+        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        show_sql: true
+  datasources:
+      -
+        url: jdbc:mysql://localhost:3306/multiple_ds_1?createDatabaseIfNotExist=true
+        dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+        platform: mysql
+        initialize: true
+        username: root
+        password: P@ssw0rd
+        driverClassName: com.mysql.jdbc.Driver
+        validation-query: SELECT * FROM users
+        hikari:
+          maximum-pool-size: 30
+          connection-timeout: 60000
+      -
+        url: jdbc:mysql://localhost:3306/multiple_ds_2?createDatabaseIfNotExist=true
+        dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+        platform: mysql
+        initialize: true
+        username: root
+        password: P@ssw0rd
+        driverClassName: com.mysql.jdbc.Driver
+        validation-query: SELECT * FROM users
+        hikari:
+          maximum-pool-size: 30
+          connection-timeout: 60000
