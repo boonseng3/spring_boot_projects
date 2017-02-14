@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,37 @@ public class TestUserRepo {
     @Autowired
     RoleRepo roleRepo;
 
+
+    /**
+     * Test that the column default values is inserted correctly for created/updated datetime.
+     * Notice that there is no @Transactional hence, no transaction and will rely on the
+     * database default auto-commit value.
+     */
+    @Test
+    public void testCreatedUpdatedDatetime() {
+        User user = TestUtil.createUser();
+        userRepo.save(user);
+
+        User dbUser = userRepo.readByUsername(user.getUsername()).get();
+        assertThat(dbUser).isEqualToIgnoringGivenFields(user, "createdDateTime", "updatedDateTime");
+        // created datetime equal to updated datetime
+        assertThat(dbUser.getCreatedDateTime()).isEqualByComparingTo(dbUser.getUpdatedDateTime());
+
+        // ensure the update will differ by at least 1 sec
+        TestUtil.sleep(1000);
+
+        dbUser.setEmail(UUID.randomUUID().toString());
+        userRepo.save(dbUser);
+
+        dbUser = userRepo.readByUsername(user.getUsername()).get();
+        // created datetime less than updated datetime
+        assertThat(dbUser.getCreatedDateTime()).isLessThan(dbUser.getUpdatedDateTime());
+    }
+
+    /**
+     * Test that LazyInitializationException thrown when accessing the role attribute without entity graph.
+     * Notice that there is no transactional annotation, hence the transaction for saving has been committed and closed.
+     */
     @Test
     public void createUserWithoutRoleWithoutEntityGraph() {
         User user = TestUtil.createUser();
@@ -47,19 +79,19 @@ public class TestUserRepo {
                 .hasMessage("failed to lazily initialize a collection of role: com.obs.entity.User.roles, could not initialize proxy - no Session");
     }
 
-
     @Test
-    public void createUserWithoutRole() {
+    @Transactional
+    public void createUserWithoutRoleWithoutEntityGraphWithTransaction() {
+        System.out.println("userRepo.findAll().size() = " + userRepo.findAll().size());
         User user = TestUtil.createUser();
         userRepo.save(user);
-
-        User dbUser = userRepo.readByUsername(user.getUsername()).get();
+        System.out.println("userRepo.findAll().size() = " + userRepo.findAll().size());
+        User dbUser = userRepo.findOne(user.getId());
         assertThat(dbUser).isEqualToIgnoringGivenFields(user, "createdDateTime", "updatedDateTime");
-        assertThat(dbUser.getCreatedDateTime()).isEqualByComparingTo(dbUser.getUpdatedDateTime());
     }
 
-
     @Test
+    @Transactional
     public void createUser() {
         User user = TestUtil.createUser();
         user.getRoles().add(roleRepo.findByName("ROLE_ADMIN").get());
@@ -67,12 +99,12 @@ public class TestUserRepo {
 
         User dbUser = userRepo.readByUsername(user.getUsername()).get();
         assertThat(dbUser).isEqualToIgnoringGivenFields(user, "createdDateTime", "updatedDateTime");
-        assertThat(dbUser.getCreatedDateTime()).isEqualByComparingTo(dbUser.getUpdatedDateTime());
         logger.debug("Created object {}", dbUser);
     }
 
 
     @Test
+    @Transactional
     public void updateUser() {
         User user = TestUtil.createUser();
         user.getRoles().add(roleRepo.findByName("ROLE_ADMIN").get());
@@ -87,12 +119,12 @@ public class TestUserRepo {
 
         User dbUser = userRepo.readByUsername(updateUser.getUsername()).get();
         assertThat(dbUser).isEqualToIgnoringGivenFields(updateUser, "updatedDateTime");
-        assertThat(dbUser.getCreatedDateTime()).isLessThan(dbUser.getUpdatedDateTime());
         logger.debug("Created object {}", dbUser);
     }
 
 
     @Test
+    @Transactional
     public void pageableUsers() {
         for (int i = 1; i <= 10; i++) {
             User user = TestUtil.createUser();
@@ -123,6 +155,7 @@ public class TestUserRepo {
     }
 
     @Test
+    @Transactional
     public void pageableSortUsers() {
         for (int i = 1; i <= 10; i++) {
             User user = TestUtil.createUser();

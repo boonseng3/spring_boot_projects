@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class TestPostRepo {
     OrphanCommentRepo orphanCommentRepo;
 
     @Test
+    @Transactional
     public void createPostCascadePersist() {
 
         Post post = TestUtil.createPost();
@@ -59,6 +61,7 @@ public class TestPostRepo {
     }
 
     @Test
+    @Transactional
     public void updatePostWithOrphanRemoval() {
 
         Post post = TestUtil.createPost();
@@ -111,6 +114,7 @@ public class TestPostRepo {
     }
 
     @Test
+    @Transactional
     public void updatePostWithoutOrphanRemoval() {
 
         Post post = TestUtil.createPost();
@@ -163,6 +167,7 @@ public class TestPostRepo {
     }
 
     @Test
+    @Transactional
     public void deletePost() {
 
         Post post = TestUtil.createPost();
@@ -196,14 +201,12 @@ public class TestPostRepo {
     }
 
     private void verifyPost(Post dbObject, Post post, Comment... comments) {
-        assertThat(dbObject).isEqualToIgnoringGivenFields(post, "createdDateTime", "updatedDateTime");
+        assertThat(dbObject).isEqualToIgnoringGivenFields(post, "createdDateTime", "updatedDateTime", "comments");
         assertThat(dbObject.getComments()).containsExactlyInAnyOrder(comments);
-        assertThat(dbObject.getCreatedDateTime()).isEqualByComparingTo(dbObject.getUpdatedDateTime());
     }
 
     private void verifyPost(Post dbObject, Comment... comments) {
         assertThat(dbObject.getComments()).containsExactlyInAnyOrder(comments);
-        assertThat(dbObject.getCreatedDateTime()).isEqualByComparingTo(dbObject.getUpdatedDateTime());
     }
 
     private void verifyComment(OrphanComment dbObject, OrphanComment comment, Post post) {
@@ -214,11 +217,9 @@ public class TestPostRepo {
     private void verifyPost(Post dbObject, Post post, OrphanComment... comments) {
         assertThat(dbObject).isEqualToIgnoringGivenFields(post, "createdDateTime", "updatedDateTime");
         assertThat(dbObject.getOrphanComments()).containsExactlyInAnyOrder(comments);
-        assertThat(dbObject.getCreatedDateTime()).isEqualByComparingTo(dbObject.getUpdatedDateTime());
     }
 
     private void verifyPost(Post dbObject, OrphanComment... comments) {
         assertThat(dbObject.getOrphanComments()).containsExactlyInAnyOrder(comments);
-        assertThat(dbObject.getCreatedDateTime()).isEqualByComparingTo(dbObject.getUpdatedDateTime());
     }
 }

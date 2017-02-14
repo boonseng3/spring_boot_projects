@@ -6,7 +6,7 @@ spring:
     initialize: true
     username: root
     password: P@ssw0rd
-    driverClassName: com.mysql.jdbc.Driver
+    #driverClassName: com.mysql.jdbc.Driver
     validation-query: SELECT * FROM users
     hikari:
       maximum-pool-size: 30

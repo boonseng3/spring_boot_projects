@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -29,18 +30,19 @@ public class TestRoleRepo {
     RoleRepo roleRepo;
 
     @Test
+    @Transactional
     public void createRole() {
         Role role = TestUtil.createRole();
         roleRepo.save(role);
 
         Role dbRole = roleRepo.findOne(role.getId());
         assertThat(dbRole).isEqualToIgnoringGivenFields(role, "createdDateTime", "updatedDateTime");
-        assertThat(dbRole.getCreatedDateTime()).isEqualByComparingTo(dbRole.getUpdatedDateTime());
         logger.debug("Created object {}", dbRole);
     }
 
 
     @Test
+    @Transactional
     public void updateRole() {
         Role role = TestUtil.createRole();
         roleRepo.save(role);
@@ -55,7 +57,6 @@ public class TestRoleRepo {
 
         Role dbRole = roleRepo.findOne(role.getId());
         assertThat(dbRole).isEqualToIgnoringGivenFields(updatedRole, "createdDateTime", "updatedDateTime");
-        assertThat(dbRole.getCreatedDateTime()).isLessThan(dbRole.getUpdatedDateTime());
         logger.debug("Created object {}", dbRole);
     }
 }
