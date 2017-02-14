@@ -1,6 +1,8 @@
 package com.obs.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -24,18 +26,23 @@ import javax.sql.DataSource;
         transactionManagerRef = "transactionManager2"
 )
 public class DataSourceConfig2 {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Value("${spring.datasources[1].type}")
+    String dataSourceType;
+
     @Bean
     @ConfigurationProperties(prefix = "spring.datasources[1]")
     public DataSource secondaryDataSource1() {
+        try {
+            return DataSourceBuilder.create().type((Class<? extends DataSource>) Class.forName(dataSourceType)).build();
+        } catch (ClassNotFoundException e) {
+            logger.error("Exception creating dataSource", e);
+        }
         return DataSourceBuilder.create().build();
     }
 
-    @Autowired
-    EntityManagerFactoryBuilder builder;
-
-
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory2() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory2(EntityManagerFactoryBuilder builder) {
 
         LocalContainerEntityManagerFactoryBean factory = builder
                 .dataSource(secondaryDataSource1())
@@ -46,10 +53,10 @@ public class DataSourceConfig2 {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager2() {
+    public PlatformTransactionManager transactionManager2(EntityManagerFactoryBuilder builder) {
 
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory2().getObject());
+        transactionManager.setEntityManagerFactory(entityManagerFactory2(builder).getObject());
         return transactionManager;
     }
 

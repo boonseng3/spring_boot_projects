@@ -17,6 +17,7 @@
         <HikariCP.version>2.4.7</HikariCP.version>
         <mysql.version>5.1.37</mysql.version>
         <hibernate.version>5.0.11.Final</hibernate.version>
+        <flyaway.version>4.0.3</flyaway.version>
     </properties>
     <dependencies>
         <!-- Spring-->
@@ -44,6 +45,11 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${HikariCP.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyaway.version}</version>
         </dependency>
     </dependencies>
 

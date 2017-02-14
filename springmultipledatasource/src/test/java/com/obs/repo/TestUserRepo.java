@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,6 +42,7 @@ public class TestUserRepo {
 
 
     @Test
+    @Transactional(transactionManager = "transactionManager1")
     public void verifyDataSource1Table() {
         Integer count = jdbcTemplate1.queryForObject("SELECT Count(*) FROM user", Integer.class);
         assertThat(count).isGreaterThanOrEqualTo(0);
@@ -54,6 +56,7 @@ public class TestUserRepo {
     }
 
     @Test
+    @Transactional(transactionManager = "transactionManager2")
     public void verifyDataSource2Table() {
         Integer count = jdbcTemplate2.queryForObject("SELECT Count(*) FROM alternate_user", Integer.class);
         assertThat(count).isGreaterThanOrEqualTo(0);
@@ -66,30 +69,26 @@ public class TestUserRepo {
                 .hasCause(new MySQLSyntaxErrorException("Table 'multiple_ds_2_test.user' doesn't exist"));
     }
 
-    // Do not need to specify the transaction manager because dataSource config
-    // has configured the repo to the respective transaction manager
-    //    @Transactional(transactionManager = "transactionManager1")
     @Test
+    @Transactional(transactionManager = "transactionManager1")
     public void createUserInDs1() {
         User user = TestUtil.createUser();
         userRepo.save(user);
 
         User dbUser = userRepo.findByUsername(user.getUsername()).get();
         assertThat(dbUser).isEqualToIgnoringGivenFields(user, "createdDateTime", "updatedDateTime");
-        assertThat(dbUser.getCreatedDateTime()).isEqualByComparingTo(dbUser.getUpdatedDateTime());
         Integer count = jdbcTemplate1.queryForObject("SELECT Count(*) FROM user", Integer.class);
         assertThat(count).isGreaterThanOrEqualTo(1);
     }
 
-    //    @Transactional(transactionManager = "transactionManager2")
     @Test
+    @Transactional(transactionManager = "transactionManager2")
     public void createUserInDs2() {
         AlternateUser user = TestUtil.createUser1();
         alternateUserRepo.save(user);
 
         AlternateUser dbUser = alternateUserRepo.findByUsername(user.getUsername()).get();
         assertThat(dbUser).isEqualToIgnoringGivenFields(user, "createdDateTime", "updatedDateTime");
-        assertThat(dbUser.getCreatedDateTime()).isEqualByComparingTo(dbUser.getUpdatedDateTime());
         Integer count = jdbcTemplate2.queryForObject("SELECT Count(*) FROM alternate_user", Integer.class);
         assertThat(count).isGreaterThanOrEqualTo(1);
     }

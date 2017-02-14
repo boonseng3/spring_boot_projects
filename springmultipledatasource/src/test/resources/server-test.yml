@@ -1,35 +1,39 @@
 spring:
   jpa:
-#    show-sql: true
     properties:
       # hibernate custom properties
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
-        hbm2ddl.auto: create
+        hbm2ddl.auto: none
         physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         show_sql: true
   datasources:
       -
-        url: jdbc:mysql://localhost:3306/multiple_ds_1_test?createDatabaseIfNotExist=true
-        dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-        platform: mysql
-        initialize: true
+        jdbc-url: jdbc:mysql://localhost:3306/multiple_ds_1_test?createDatabaseIfNotExist=true
+        type: com.zaxxer.hikari.HikariDataSource
         username: root
         password: P@ssw0rd
-        driverClassName: com.mysql.jdbc.Driver
+        driver-class-name: com.mysql.jdbc.Driver
         validation-query: SELECT * FROM users
-        hikari:
-          maximum-pool-size: 30
-          connection-timeout: 60000
+        maximum-pool-size: 30
+        pool-name: ds1
       -
-        url: jdbc:mysql://localhost:3306/multiple_ds_2_test?createDatabaseIfNotExist=true
-        dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-        platform: mysql
-        initialize: true
+        jdbc-url: jdbc:mysql://localhost:3306/multiple_ds_2_test?createDatabaseIfNotExist=true
+        type: com.zaxxer.hikari.HikariDataSource
         username: root
         password: P@ssw0rd
-        driverClassName: com.mysql.jdbc.Driver
+        driver-class-name: com.mysql.jdbc.Driver
         validation-query: SELECT * FROM users
-        hikari:
-          maximum-pool-size: 30
-          connection-timeout: 60000
+        maximum-pool-size: 30
+        pool-name: ds2
+flyway:
+  enabled: true
+  datasources:
+    -
+      locations: classpath:db/migration/ds1
+      schemas: multiple_ds_1_test
+      url: jdbc:mysql://localhost:3306/multiple_ds_1_test?createDatabaseIfNotExist=true
+    -
+      locations: classpath:db/migration/ds2
+      schemas: multiple_ds_2_test
+      url: jdbc:mysql://localhost:3306/multiple_ds_2_test?createDatabaseIfNotExist=true

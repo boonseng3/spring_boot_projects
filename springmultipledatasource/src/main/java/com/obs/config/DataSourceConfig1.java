@@ -1,6 +1,8 @@
 package com.obs.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -25,18 +27,25 @@ import javax.sql.DataSource;
         transactionManagerRef = "transactionManager1"
 )
 public class DataSourceConfig1 {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Value("${spring.datasources[0].type}")
+    String dataSourceType;
+
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "spring.datasources[0]")
     public DataSource primaryDataSource() {
+        try {
+            return DataSourceBuilder.create().type((Class<? extends DataSource>) Class.forName(dataSourceType)).build();
+        } catch (ClassNotFoundException e) {
+            logger.error("Exception creating dataSource", e);
+        }
         return DataSourceBuilder.create().build();
     }
 
-    @Autowired
-    EntityManagerFactoryBuilder builder;
-
+    @Primary
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory1() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory1(EntityManagerFactoryBuilder builder) {
 
         LocalContainerEntityManagerFactoryBean factory = builder
                 .dataSource(primaryDataSource())
@@ -47,10 +56,10 @@ public class DataSourceConfig1 {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager1() {
+    public PlatformTransactionManager transactionManager1(EntityManagerFactoryBuilder builder) {
 
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory1().getObject());
+        transactionManager.setEntityManagerFactory(entityManagerFactory1(builder).getObject());
         return transactionManager;
     }
 
