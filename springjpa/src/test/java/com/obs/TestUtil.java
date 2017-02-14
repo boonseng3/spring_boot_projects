@@ -12,6 +12,9 @@ import java.util.UUID;
  */
 public class TestUtil {
 
+    public static int INITIAL_USER_COUNT = 1;
+    public static int INITIAL_ROLE_COUNT = 2;
+
     /**
      * Return a user with default values with no roles
      *

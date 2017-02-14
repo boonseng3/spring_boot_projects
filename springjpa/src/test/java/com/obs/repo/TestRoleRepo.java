@@ -3,6 +3,7 @@ package com.obs.repo;
 import com.obs.ApplicationServer;
 import com.obs.TestUtil;
 import com.obs.entity.Role;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.obs.TestUtil.INITIAL_ROLE_COUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -28,6 +30,16 @@ public class TestRoleRepo {
 
     @Autowired
     RoleRepo roleRepo;
+
+    /**
+     * Ensure that the test methods has transactional annotation applied.
+     * Hence, all records will begin with the initial user count.
+     */
+    @Before
+    public void before() {
+        System.out.println("size = " + roleRepo.findAll().size());
+        assertThat(roleRepo.findAll().size()).isEqualTo(INITIAL_ROLE_COUNT);
+    }
 
     @Test
     @Transactional
